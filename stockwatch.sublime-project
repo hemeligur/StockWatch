@@ -1,0 +1,17 @@
+{
+	"folders":
+	[
+		{
+			"path": "/mnt/Arquivos_B/Documents/Guilherme/Dev/Python/Django/StockWatch",
+		}
+	],
+	"build_systems":
+	[
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"python3\" -u \"$file\""
+		}
+	],
+}
