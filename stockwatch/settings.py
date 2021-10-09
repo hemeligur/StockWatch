@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import environ
-import os
 
 env = environ.Env(
     # set casting, default value
@@ -22,12 +21,11 @@ env = environ.Env(
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-PROJECT_DIR = Path(__file__).resolve().parent
 
 READ_ENV_FILE = env.bool('READ_ENV_FILE', default=False)
 if READ_ENV_FILE:
     # Take environment variables from .env file
-    environ.Env.read_env(os.path.join(PROJECT_DIR, '.env'))
+    environ.Env.read_env()
 
 # False if not in os.environ because of casting above
 DEBUG = env('DEBUG')
