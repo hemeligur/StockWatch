@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils import timezone
-import yfinance as yf
 
 
 class User(AbstractUser):
@@ -22,38 +20,6 @@ class Stock(models.Model):
     def __str__(self):
         return self.name
 
-    # Valid periods: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
-    def get_history(self, period="6mo", start_date=None, end_date=None, interval="1d"):
-        ticker = yf.Ticker(self.code)
-
-        # Validations
-        valid_intervals = ["1m", "2m", "5m", "15m", "30m", "90m",
-                           "60m", "1h", "1d", "5d", "1wk", "1mo", "3mo"]
-        valid_periods = ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
-
-        try:
-            interval_idx = valid_intervals.index(interval)
-            period_idx = valid_periods.index(period)
-
-            if interval_idx <= 5 and period_idx > 2:
-                raise ValueError(
-                    f"For interval {interval} the requested period must be within the last 60 days")
-            elif interval_idx >= 6 and interval_idx <= 7 and period_idx > 6:
-                raise ValueError(
-                    f"For interval {interval} the requested period must be within the last 2 years")
-
-        except ValueError as err:
-            # TODO
-            print("invalid interval and/or period:", err)
-            raise
-
-        if start_date is not None:
-            end_date = end_date if end_date is not None else timezone.now()
-            history = ticker.history(start=start_date, end=end_date)
-        else:
-            history = ticker.history(period=period)
-
-        return history
 
 class StockWatch(models.Model):
 
