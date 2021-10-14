@@ -40,8 +40,8 @@ class StockDetailView(DetailView):
         try:
             obj = super().get_object()
 
-            # Atualiza o preço atual se a última atualização tiver sido há mais de 1 dia
-            if obj.last_update is None or timezone.now() - obj.last_update > timedelta(days=1):
+            # Atualiza o preço atual se a última atualização tiver sido há mais de 12 horas
+            if obj.last_update is None or timezone.now() - obj.last_update > timedelta(hours=12):
                 self.stock_data = StockData(code)
 
                 obj.current_price = self.stock_data.get_last_price()
@@ -64,3 +64,10 @@ class StockDetailView(DetailView):
                 raise
 
         return obj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.stock_data is None:
+            self.stock_data = StockData(context['stock'].code)
+        context['hist_summary'] = self.stock_data.get_history()
+        return context
