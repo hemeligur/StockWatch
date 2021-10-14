@@ -1,13 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from .stockdata.wrapper import API_VALID_INTERVALS
+
 
 class User(AbstractUser):
     pass
 
 
 class Stock(models.Model):
-    # TODO: Define fields here
+
     code = models.CharField(max_length=15, primary_key=True)
     name = models.CharField(max_length=50)
     current_price = models.FloatField(null=True, blank=True)
@@ -23,27 +25,13 @@ class Stock(models.Model):
 
 class StockWatch(models.Model):
 
-    INTERVALS = {
-        ("1m", "1m"),
-        ("2m", "2m"),
-        ("5m", "5m"),
-        ("15m", "15m"),
-        ("30m", "30m"),
-        ("60m", "60m"),
-        ("90m", "90m"),
-        ("1h", "1h"),
-        ("1d", "1d"),
-        ("5d", "5d"),
-        ("1wk", "1wk"),
-        ("1mo", "1mo"),
-        ("3mo", "3mo")
-
-    }
+    INTERVALS = {(i, i) for i in API_VALID_INTERVALS}
 
     stock = models.ForeignKey(to="Stock", on_delete=models.CASCADE)
     upper_threshold = models.FloatField()
     lower_threshold = models.FloatField()
-    interval = models.CharField(max_length=5, default="1d", choices=INTERVALS)
+    # Default interval is 1 day
+    interval = models.CharField(max_length=5, default=API_VALID_INTERVALS[8], choices=INTERVALS)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
@@ -51,4 +39,4 @@ class StockWatch(models.Model):
         verbose_name_plural = "StockWatchs"
 
     def __str__(self):
-        pass
+        return f'{self.stock.code}:[{self.lower_threshold}-{self.upper_threshold}]:{self.interval}'
