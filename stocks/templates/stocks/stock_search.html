@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>StockWatch - Pesquisa de ativos</title>
-    <link rel="stylesheet" href="">
-</head>
-<body>
-    <h1>Pesquise pelo código do ativo ou pelo nome da empresa/índice</h1>
+{% block search_box %}
+    <h2>Pesquise pelo código do ativo ou pelo nome da empresa/índice</h2>
     {# {% url 'search_results' %} #}
-    <form action="." method="get">
-        <input name="q" type="text" placeholder="Search...">
+    <form action="{% url 'stocks:stock_search' %}" method="get">
+        <input name="q" type="text" placeholder="Ativo...">
+        <button type="submit">Pesquisar</button>
     </form>
-</body>
-</html>
+{% endblock search_box %}

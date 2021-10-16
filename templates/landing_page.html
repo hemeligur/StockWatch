@@ -1,14 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Stock Watch</title>
-    <link rel="stylesheet" href="">
-</head>
-<body>
-    <h1>Monitoramento de ações</h1>
-    <hr>
-    <p>Pesquise pelo código da ação ou nome da empresa/índice</p>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="text-gray-600 body-font">
+        <div class="container mx-auto flex px-5 py-24 items-center justify-center flex-col">
+            <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">Monitoramento de ativos</h1>
+            <img class="lg:w-2/6 md:w-3/6 w-5/6 mb-10 object-cover object-center rounded" alt="hero" src="https://dummyimage.com/720x600">
+            <div class="text-center lg:w-2/3 w-full">
+              <p class="mb-8 leading-relaxed">Monitore a evolução de ativos na bolsa.</p>
+              <p class="mb-8 leading-relaxed">Crie alertas que te avisam quando o ativo ultrapassa o limite determinado, seja valorizando ou desvalorizando.</p>
+              <p class="mb-8 leading-relaxed">Receba no seu email avisos de oportunidades de compra e venda.</p>
+                <div class="flex justify-center">
+                    <button class="inline-flex text-white bg-purple-500 border-0 py-2 px-6 focus:outline-none hover:bg-purple-600 rounded text-lg">Entrar</button>
+                    <button class="ml-4 inline-flex text-gray-700 bg-gray-100 border-0 py-2 px-6 focus:outline-none hover:bg-gray-200 rounded text-lg">Cadastre-se</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% include "stocks/stock_search.html" %}
+{% endblock content %}
