@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.shortcuts import redirect
 
 from datetime import timedelta
+import json
 
 from .models import Stock
 from .stockdata.wrapper import StockData
@@ -69,5 +70,6 @@ class StockDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         if self.stock_data is None:
             self.stock_data = StockData(context['stock'].code)
-        context['hist_summary'] = self.stock_data.get_history()
+        hist = self.stock_data.format_to_chart(self.stock_data.get_history())
+        context['hist_summary'] = json.dumps(hist)
         return context

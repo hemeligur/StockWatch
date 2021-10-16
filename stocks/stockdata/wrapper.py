@@ -54,7 +54,7 @@ class StockData():
 
         return hist['Close'][0]
 
-    def get_history(self, period="6mo", start_date=None, end_date=None, interval="1d"):
+    def get_history(self, period="6mo", start_date=None, end_date=None, interval="1d", actions=False):
 
         # Validations
         validation = self._valid_interval(period, interval)
@@ -63,8 +63,21 @@ class StockData():
 
         if start_date is not None:
             end_date = end_date if end_date is not None else timezone.now()
-            history = self.stock_data.history(start=start_date, end=end_date)
+            hist = self.stock_data.history(start=start_date, end=end_date, actions=actions)
         else:
-            history = self.stock_data.history(period=period)
+            hist = self.stock_data.history(period=period, actions=actions)
 
-        return history
+        return hist
+
+    def format_to_chart(self, hist):
+        # Formating to return a list of lists in the format: label, low, open, close, high
+        cols = hist.columns.tolist()
+        cols = [cols[2]] + [cols[0]] + [cols[3]] + [cols[1]] + cols[4:]
+        hist_mod = hist[cols]
+        hist_mod = hist_mod[hist_mod.columns.tolist()[:4]]
+        hist_list = [
+            [i if idx != 0 else i.strftime("%Y-%m-%d") for idx, i in enumerate(row)]
+            for row in hist_mod.itertuples()
+        ]
+
+        return hist_list
