@@ -5,11 +5,17 @@
 {% endblock chart_script %}
 
 {% block content %}
-    <p>Código: {{stock.code}}</p>
-    <p>Nome: {{stock.name}}</p>
-    <p>Último preço: {{stock.current_price}}</p>
-    <p>Atualizado em {{stock.last_update}}</p>
-    <br><hr>
+    <div id="stock_summary">
+        <p>Código: {{stock.code}}</p>
+        <p>Nome: {{stock.name}}</p>
+        <p>Último preço: {{stock.current_price}}</p>
+        <p>Atualizado em {{stock.last_update}}</p>
+    </div>
+    <div id="ctrls">
+        <a href="#">Alterar período</a>
+        <a href="#">Alterar intervalo</a>
+        <a href="{% url "watchers:watcher_create" stock.pk %}">Criar monitor</a>
+    </div>
     <div id="chart_div"></div> 
     {# style="width: 900px; height: 500px;" #}
 {% endblock content %}

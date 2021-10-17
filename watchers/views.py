@@ -2,6 +2,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 
 from .models import Watcher
+from stocks.models import Stock
 
 # from stocks.stockdata.wrapper import StockData
 
@@ -16,7 +17,6 @@ class WatcherCreateView(CreateView):
     model = Watcher
     template_name = "watchers/watcher_create.html"
     fields = [
-        "stock",
         "upper_threshold",
         "lower_threshold",
         "interval"
@@ -26,6 +26,7 @@ class WatcherCreateView(CreateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.user = self.request.user
+        self.object.stock = Stock.objects.get(pk=self.kwargs['pk'])
         return super().form_valid(form)
 
 
