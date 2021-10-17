@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <p>Tem que certeza que quer apagar o monitor do ativo?</p>
+        <p>Ativo: {{ watcher.stock }}</p>
+        <p>Limites: {{watcher.upper_threshold}} - {{watcher.lower_threshold}} </p>
+        <p>Intervalo: {{watcher.interval}} </p>
+        <input type="submit" value="Confirmar">
+    </form>
+{% endblock content %}

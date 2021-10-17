@@ -8,9 +8,12 @@
     {# Tailwind should be incorporated in the project in production rather than using the CDN, according to Tailwind CSS best practices #}
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
 
-    {% include "navbar.html" %}
+    {% block chart_script %}
+    {% endblock chart_script %}
+
 </head>
 <body>
+    {% include "navbar.html" %}
     {% block content%}
     {% endblock content%}
 </body>

@@ -71,5 +71,8 @@ class StockDetailView(DetailView):
         if self.stock_data is None:
             self.stock_data = StockData(context['stock'].code)
         hist = self.stock_data.format_to_chart(self.stock_data.get_history())
-        context['hist_summary'] = json.dumps(hist)
+        context['chart_data'] = json.dumps(hist)
+        context['chart_title'] = json.dumps("Histórico dos últimos 6 meses")
+        context['chart_h'] = 800
+        context['chart_w'] = 2000
         return context

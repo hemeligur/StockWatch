@@ -1,0 +1,29 @@
+{% block chart_script %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable({{chart_data|safe}}, true);
+
+        var options = {
+            legend:'none',
+            candlestick: {
+                hollowIsRising: true,
+                fallingColor: { fill: '#ffffff', stroke: '#a52714' }, // red
+                risingColor: { stroke: '#0f9d58' }   // green
+            },
+            height: {{chart_h}},
+            width: {{chart_w}},
+            vAxis: {viewWindowMode: 'maximized'},
+            bar: { groupWidth: '90%' },
+            title: {{chart_title|safe}}
+        };
+
+        var chart = new google.visualization.CandlestickChart(document.getElementById('chart_div'));
+
+        chart.draw(data, options);
+      }
+    </script>
+{% endblock chart_script %}

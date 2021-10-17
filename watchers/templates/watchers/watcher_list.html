@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for watcher in watchers %}
+        <p><a href="{% url 'watchers:watcher_detail' watcher.pk %}">{{watcher}}</a></p>
+    {% endfor %}
+{% endblock content %}
