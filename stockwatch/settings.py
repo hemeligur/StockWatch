@@ -41,12 +41,18 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third party apps
+    'django_q',
+
+    # Project apps
     'stocks',
     'watchers'
 ]
@@ -143,3 +149,12 @@ STATIC_ROOT = "/static_root/"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "stocks.User"
+
+# Q cluster Configuration
+# More details https://django-q.readthedocs.io/en/latest/configure.html
+Q_CLUSTER = {
+    "name": "stockwatch",
+    "orm": "default",  # Use Django's ORM + database for broker
+    "timeout": 60,
+    "retry": 120
+}
