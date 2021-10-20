@@ -2,6 +2,6 @@
 
 {% block content %}
     {% for watcher in watchers %}
-        <p><a href="{% url 'watchers:watcher_detail' watcher.pk %}">{{watcher}}</a></p>
+        <p><a href="{% url 'watchers:watcher_detail' watcher.pk %}">{{watcher}}:{{watcher.stock.current_price|floatformat:2}}</a></p>
     {% endfor %}
 {% endblock content %}

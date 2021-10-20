@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {{watcher}}
+    <p>{{watcher}}: {{watcher.stock.current_price|floatformat:2}}</p>
+    <a href="{% url 'watchers:watcher_update' watcher.pk %}">Alterar</a>
+    <a href="{% url 'watchers:watcher_delete' watcher.pk %}">Excluir</a>
 {% endblock content %}
