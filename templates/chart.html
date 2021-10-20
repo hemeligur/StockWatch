@@ -5,7 +5,7 @@
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
-        var data = google.visualization.arrayToDataTable({{chart_data|safe}}, true);
+        var data = google.visualization.arrayToDataTable({{chart_config.data|safe}}, true);
 
         var options = {
             legend:'none',
@@ -14,11 +14,11 @@
                 fallingColor: { fill: '#ffffff', stroke: '#a52714' }, // red
                 risingColor: { stroke: '#0f9d58' }   // green
             },
-            height: {{chart_h}},
-            width: {{chart_w}},
+            height: {{chart_config.height}},
+            width: {{chart_config.width}},
             vAxis: {viewWindowMode: 'maximized'},
             bar: { groupWidth: '90%' },
-            title: {{chart_title|safe}}
+            title: {{chart_config.title|safe}}
         };
 
         var chart = new google.visualization.CandlestickChart(document.getElementById('chart_div'));

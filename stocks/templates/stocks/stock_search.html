@@ -1,8 +1,10 @@
-{% block search_box %}
+{% extends "base.html" %}
+
+{% block content %}
     <h2>Pesquise pelo código do ativo ou pelo nome da empresa/índice</h2>
     {# {% url 'search_results' %} #}
     <form action="{% url 'stocks:stock_search' %}" method="get">
         <input name="q" type="text" placeholder="Ativo...">
         <button type="submit">Pesquisar</button>
     </form>
-{% endblock search_box %}
+{% endblock content %}
