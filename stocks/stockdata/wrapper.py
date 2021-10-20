@@ -1,4 +1,5 @@
 from django.utils import timezone
+import arrow
 import yfinance as yf
 
 # https://www.guiainvest.com.br/lista-acoes/default.aspx?listaacaopesquisa=petrobras
@@ -7,6 +8,24 @@ API_VALID_INTERVALS = ["1m", "2m", "5m", "15m", "30m", "90m",
                        "60m", "1h", "1d", "5d", "1wk", "1mo", "3mo"]
 API_VALID_PERIODS = ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
 
+# ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
+# ["1m", "2m", "5m", "15m", "30m", "90m", "60m", "1h", "1d", "5d", "1wk", "1mo", "3mo"]
+#   0,     1,    2,    3,     4,     5,     6,     7,    8,    9,    10,    11,    12
+
+B3_WORKING_HOURS = (9, 19)
+
+
+def is_working_hours():
+    now = arrow.now()
+
+    start = now.replace(hour=B3_WORKING_HOURS[0], minute=0)
+    end = now.replace(hour=B3_WORKING_HOURS[1], minute=0)
+
+    if now.is_between(start, end):
+        return True
+
+    return False
+
 
 class StockData():
     ''' A simple interface for the yahoo finance API to decouple it from the rest of the system '''
@@ -14,24 +33,6 @@ class StockData():
     def __init__(self, code):
         self.code = code
         self.stock_data = yf.Ticker(self.code + ".SA")
-
-    def _valid_interval(self, period, interval):
-        try:
-            interval_idx = API_VALID_INTERVALS.index(interval)
-            period_idx = API_VALID_PERIODS.index(period)
-
-            error_message = (f"For interval {interval},"
-                             f" the requested period must be within the last %d %s.")
-
-            if interval_idx <= 5 and period_idx > 2:
-                return (False, error_message % (60, 'days'))
-            elif interval_idx >= 6 and interval_idx <= 7 and period_idx > 6:
-                return (False, error_message % (2, 'years'))
-        except ValueError as err:
-            # TODO
-            return (False, f"invalid interval and/or period: {err}")
-
-        return (True, "")
 
     def symbol_search(self, query):
         pass
@@ -49,15 +50,18 @@ class StockData():
         else:
             return None
 
-    def get_last_price(self):
-        hist = self.get_history(period=API_VALID_PERIODS[0], interval=API_VALID_INTERVALS[0])
+    def get_last_price(self, interval="1m"):
+        end_date = arrow.now()
+        minutes_to_shift = self._convert_interval(interval)
+        start_date = end_date.shift(minutes=-minutes_to_shift)
+        hist = self.get_history(start_date=start_date.datetime, end_date=end_date.datetime, interval=interval)
 
-        return hist['Close'][0]
+        return hist['Close'][-1]
 
     def get_history(self, period="6mo", start_date=None, end_date=None, interval="1d", actions=False):
 
         # Validations
-        validation = self._valid_interval(period, interval)
+        validation = self._valid_interval(period, interval, start_date)
         if not validation[0]:
             raise ValueError(validation[1])
 
@@ -81,3 +85,43 @@ class StockData():
         ]
 
         return hist_list
+
+    def _valid_interval(self, period, interval, start_date):
+        try:
+            interval_idx = API_VALID_INTERVALS.index(interval)
+            period_idx = API_VALID_PERIODS.index(period)
+
+            error_message = (f"For interval {interval},"
+                             f" the requested period must be within the last %d %s.")
+
+            if start_date is None:
+                if interval_idx <= 5 and period_idx > 2:
+                    return (False, error_message % (60, 'days'))
+                elif (interval_idx >= 6 and interval_idx <= 7) and period_idx > 6:
+                    return (False, error_message % (2, 'years'))
+            else:
+                if interval_idx <= 5 and ((arrow.now() - start_date).days > 60):
+                    return (False, error_message % (60, 'days'))
+                elif (interval_idx >= 6 and interval_idx <= 7) and ((arrow.now() - start_date).days > (365 * 2)):
+                    return (False, error_message % (2, 'years'))
+        except ValueError as err:
+            # TODO
+            return (False, f"invalid interval and/or period: {err}")
+
+        return (True, "")
+
+    def _convert_interval(self, interval):
+        idx = API_VALID_INTERVALS.index(interval)
+
+        if idx <= 6:  # minutes
+            minutes = int(interval[:-1])
+        elif idx == 7:  # one hour
+            minutes = 60
+        elif idx <= 9:  # Days
+            minutes = int(interval[:-1]) * 24 * 60
+        elif idx == 10:  # week
+            minutes = 7 * 24 * 60
+        else:  # months
+            minutes = int(interval[:-2]) * 30 * 24 * 60
+
+        return minutes
