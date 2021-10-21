@@ -1,4 +1,3 @@
-from django.utils import timezone
 import arrow
 
 from django_q.tasks import schedule
