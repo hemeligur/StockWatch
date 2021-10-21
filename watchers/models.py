@@ -1,7 +1,10 @@
 from django.db import models
 
+from django_q.models import Schedule
+
 from stocks.models import User, Stock
 from stocks.stockdata.wrapper import API_VALID_INTERVALS
+from watchers.task_manager.scheduler import create_schedule
 
 class Watcher(models.Model):
 
@@ -15,6 +18,7 @@ class Watcher(models.Model):
         max_length=5, default=API_VALID_INTERVALS[8], choices=INTERVALS, verbose_name="Intervalo"
     )
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    schedule_id = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Watcher"
@@ -22,3 +26,16 @@ class Watcher(models.Model):
 
     def __str__(self):
         return f'{self.stock.code}:[{self.lower_threshold}-{self.upper_threshold}]:{self.interval}'
+
+    def save(self, *args, **kwargs):
+        # Create the schedule
+        schedule_id = create_schedule(self)
+        # Save the model with the schedule id
+        self.schedule_id = schedule_id
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Delete the schedule
+        Schedule.objects.get(pk=self.schedule_id).delete()
+        # Delete the watcher
+        super().delete(*args, **kwargs)

@@ -3,13 +3,13 @@ import arrow
 from django_q.tasks import schedule
 from django_q.models import Schedule
 
-from watchers.models import Watcher
+# from watchers.models import Watcher
 from stocks.stockdata.wrapper import API_VALID_INTERVALS, is_working_hours
 
 
 def create_schedule(watcher):
-    if not isinstance(watcher, Watcher):
-        raise ValueError(f"Wrong argument type: expected {Watcher}, got {type(watcher)}")
+    # if not isinstance(watcher, Watcher):
+    #     raise ValueError(f"Wrong argument type: expected {Watcher}, got {type(watcher)}")
 
     config = _generate_config(watcher.interval)
     schedule_id = schedule(
@@ -26,8 +26,8 @@ def create_schedule(watcher):
 
 
 def send_email_async(watcher, result):
-    if not isinstance(watcher, Watcher):
-        raise ValueError(f"Wrong argument type: expected {Watcher}, got {type(watcher)}")
+    # if not isinstance(watcher, Watcher):
+    #     raise ValueError(f"Wrong argument type: expected {Watcher}, got {type(watcher)}")
 
     user = watcher.user
     kind_str = "COMPRA" if result["kind"] > 0 else "VENDA"
