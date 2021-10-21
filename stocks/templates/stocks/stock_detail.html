@@ -8,7 +8,7 @@
     <div id="stock_summary">
         <p>Código: {{stock.code}}</p>
         <p>Nome: {{stock.name}}</p>
-        <p>Último preço: {{stock.current_price}}</p>
+        <p>Último preço: {{stock.current_price|floatformat:2}}</p>
         <p>Atualizado em {{stock.last_update}}</p>
     </div>
     <div id="ctrls">
