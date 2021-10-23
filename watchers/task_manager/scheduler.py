@@ -12,17 +12,19 @@ def create_schedule(watcher):
     #     raise ValueError(f"Wrong argument type: expected {Watcher}, got {type(watcher)}")
 
     config = _generate_config(watcher.interval)
-    schedule_id = schedule(
-        '.updater.update_price',
-        watcher,
+    print(f"############-watchers.task_manager.scheduler.create_schedule-############ Config schedule")
+    schedule_obj = schedule(
+        'watchers.task_manager.updater.update_price',
+        watcher.pk,
         schedule_type=config["schedule_type"],
         minutes=config["minutes"],
         repeats=-1,
         next_run=config["next_run"],
-        hook='.update.price_updated'
+        hook='watchers.task_manager.updater.price_updated'
     )
+    print("############-watchers.task_manager.scheduler.create_schedule-############ Schedule function executed")
 
-    return schedule_id
+    return schedule_obj.pk
 
 
 def send_email_async(watcher, result):
@@ -34,11 +36,11 @@ def send_email_async(watcher, result):
     price = result["price"]
 
     subject = "Alerta! Monitor de Ativos"
-    msg = f"Olá {user.username}\n\n,"
-    f"Seu monitor identificou uma oportunidade de {kind_str}"
-    f" para o ativo {watcher.stock.code}({watcher.stock.name}),"
-    f" com o preço de {price}."
-    f"\n\n\t{kind_str}:\t{watcher.stock.code}\t[{price}]"
+    msg = (f"Olá {user.username}\n\n,"
+           f"Seu monitor identificou uma oportunidade de {kind_str}"
+           f" para o ativo {watcher.stock.code}({watcher.stock.name}),"
+           f" com o preço de {price}."
+           f"\n\n\t{kind_str}:\t{watcher.stock.code}\t[{price}]")
 
     user.email_user(subject, msg, from_email=None)
 
@@ -90,5 +92,7 @@ def _generate_config(interval):
 
     elif idx == 12:
         config["schedule_type"] = Schedule.QUARTERLY
+
+    config['next_run'] = config['next_run'].datetime
 
     return config

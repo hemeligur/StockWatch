@@ -6,6 +6,7 @@ from stocks.models import User, Stock
 from stocks.stockdata.wrapper import API_VALID_INTERVALS
 from watchers.task_manager.scheduler import create_schedule
 
+
 class Watcher(models.Model):
 
     INTERVALS = {(i, i) for i in API_VALID_INTERVALS}
@@ -18,7 +19,7 @@ class Watcher(models.Model):
         max_length=5, default=API_VALID_INTERVALS[8], choices=INTERVALS, verbose_name="Intervalo"
     )
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    schedule_id = models.IntegerField(default=0)
+    schedule_id = models.IntegerField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Watcher"
@@ -28,8 +29,13 @@ class Watcher(models.Model):
         return f'{self.stock.code}:[{self.lower_threshold}-{self.upper_threshold}]:{self.interval}'
 
     def save(self, *args, **kwargs):
+        # Save the watcher first to generate an ID
+        super().save(*args, **kwargs)
+
         # Create the schedule
         schedule_id = create_schedule(self)
+        print(f"############-watchers.models.Watcher.save-############ Schedule created: {schedule_id}")
+
         # Save the model with the schedule id
         self.schedule_id = schedule_id
         super().save(*args, **kwargs)

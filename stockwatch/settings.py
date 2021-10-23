@@ -152,12 +152,16 @@ AUTH_USER_MODEL = "stocks.User"
 
 # Q cluster Configuration
 # More details https://django-q.readthedocs.io/en/latest/configure.html
+# Run python3 manage.py qcluster to start the proccessing of tasks
 Q_CLUSTER = {
     "name": "stockwatch",
     "orm": "default",  # Use Django's ORM + database for broker
     "timeout": 60,
     "retry": 120,
-    "catch_up": False
+    "catch_up": False,
+    'ack_failures': True,
+    'max_attempts': 1,
+    'attempt_count': 1
 }
 
 EMAIL_BACKEND = 'django_q_email.backends.DjangoQBackend'
@@ -165,3 +169,4 @@ EMAIL_BACKEND = 'django_q_email.backends.DjangoQBackend'
 # Using 'python -m smtpd -n -c DebuggingServer localhost:1025' as a SMTP server for development testing
 EMAIL_HOST = "localhost"
 EMAIL_PORT = 1025
+DEFAULT_FROM_EMAIL = "watcher@stockwatch.com"
