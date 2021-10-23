@@ -1,9 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.mail import send_mail
 
 
 class User(AbstractUser):
-    pass
+    def email_user(self, subject, message, from_email=None, **kwargs):
+        """Send an email to this user."""
+        return send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
 class Stock(models.Model):

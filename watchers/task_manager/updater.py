@@ -29,8 +29,8 @@ def price_updated(task):
     if task.result["opportunity"] is True:
         watcher = Watcher.objects.get(pk=task.args[0])
         sent = send_email_async(watcher, task.result)
-
+        print(f"############-watchers.task_manager.updater.update_price-############ Sent {sent} email(s)")
         # If the email was sent, you don't want to send the email again next interval
         # The watcher did it's job
         if sent == 1:
-            pass
+            watcher.remove_schedule()

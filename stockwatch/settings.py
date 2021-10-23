@@ -159,9 +159,10 @@ Q_CLUSTER = {
     "timeout": 60,
     "retry": 120,
     "catch_up": False,
-    'ack_failures': True,
-    'max_attempts': 1,
-    'attempt_count': 1
+    "ack_failures": True,
+    "max_attempts": 1,
+    "attempt_count": 1,
+    "save_limit": 5
 }
 
 EMAIL_BACKEND = 'django_q_email.backends.DjangoQBackend'

@@ -42,7 +42,7 @@ def send_email_async(watcher, result):
            f" com o preço de {price}."
            f"\n\n\t{kind_str}:\t{watcher.stock.code}\t[{price}]")
 
-    user.email_user(subject, msg, from_email=None)
+    return user.email_user(subject, msg, from_email=None)
 
 
 def _generate_config(interval):

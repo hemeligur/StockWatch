@@ -19,7 +19,7 @@ class Watcher(models.Model):
         max_length=5, default=API_VALID_INTERVALS[8], choices=INTERVALS, verbose_name="Intervalo"
     )
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    schedule_id = models.IntegerField(null=True, blank=True)
+    schedule = models.IntegerField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Watcher"
@@ -32,16 +32,25 @@ class Watcher(models.Model):
         # Save the watcher first to generate an ID
         super().save(*args, **kwargs)
 
-        # Create the schedule
-        schedule_id = create_schedule(self)
-        print(f"############-watchers.models.Watcher.save-############ Schedule created: {schedule_id}")
-
-        # Save the model with the schedule id
-        self.schedule_id = schedule_id
-        super().save(*args, **kwargs)
+        self.add_schedule()
 
     def delete(self, *args, **kwargs):
-        # Delete the schedule
-        Schedule.objects.get(pk=self.schedule_id).delete()
+        self.remove_schedule()
         # Delete the watcher
         super().delete(*args, **kwargs)
+
+    def add_schedule(self):
+        if self.schedule is None:
+            # Create the schedule
+            schedule = create_schedule(self)
+
+            # Save the model with the schedule id
+            self.schedule = schedule
+            super().save(update_fields=['schedule'])
+
+    def remove_schedule(self):
+        if self.schedule is not None:
+            # Delete the schedule
+            Schedule.objects.get(pk=self.schedule).delete()
+            self.schedule = None
+            super().save(update_fields=['schedule'])
