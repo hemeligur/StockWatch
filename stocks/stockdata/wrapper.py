@@ -1,6 +1,7 @@
 from django.utils import timezone
 import arrow
 import yfinance as yf
+from statistics import mean
 
 # https://www.guiainvest.com.br/lista-acoes/default.aspx?listaacaopesquisa=petrobras
 
@@ -13,6 +14,15 @@ API_VALID_PERIODS = ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "
 #   0,     1,    2,    3,     4,     5,     6,     7,    8,    9,    10,    11,    12
 
 B3_WORKING_HOURS = (9, 19)
+DEFAULT_LOOKUP_TIME = mean(B3_WORKING_HOURS)
+
+
+def is_working_day():
+    weekday = arrow.now().weekday()
+    if weekday >= 5:
+        return False
+
+    return True
 
 
 def is_working_hours():
@@ -27,11 +37,38 @@ def is_working_hours():
     return False
 
 
+def is_working_time():
+    return is_working_day() and is_working_hours()
+
+
+def get_next_working_time():
+    now = next_work_time = arrow.now()
+    changed = False
+    if not is_working_day():
+        next_work_time = next_work_time.shift(weekday=0)
+        changed = True
+
+    if not is_working_hours():
+        # Now can be before opening or after closing
+        next_work_time = next_work_time.replace(hour=DEFAULT_LOOKUP_TIME, minute=0, second=0)
+
+        # If it's already past the default lookup time, we can assume now is after closing, next run is tomorrow
+        if (next_work_time - now).days < 0:
+            next_work_time = next_work_time.shift(days=1)
+        changed = True
+
+    if not changed:
+        # If nothing is changed than set the next time to 1 minute in the future
+        next_work_time = next_work_time.shift(minutes=1)
+
+    return next_work_time.datetime
+
+
 class StockData():
     ''' A simple interface for the yahoo finance API to decouple it from the rest of the system '''
 
     def __init__(self, code):
-        self.code = code
+        self.code = code.upper()
         self.stock_data = yf.Ticker(self.code + ".SA")
 
     def symbol_search(self, query):
@@ -52,8 +89,8 @@ class StockData():
 
     def get_last_price(self, interval="1m"):
         end_date = arrow.now()
-        minutes_to_shift = self._convert_interval(interval)
-        start_date = end_date.shift(minutes=-minutes_to_shift)
+        # minutes_to_shift = self._convert_interval(interval)
+        start_date = end_date.shift(days=-3)
         hist = self.get_history(start_date=start_date.datetime, end_date=end_date.datetime, interval=interval)
 
         return hist['Close'][-1]
@@ -105,7 +142,6 @@ class StockData():
                 elif (interval_idx >= 6 and interval_idx <= 7) and ((arrow.now() - start_date).days > (365 * 2)):
                     return (False, error_message % (2, 'years'))
         except ValueError as err:
-            # TODO
             return (False, f"invalid interval and/or period: {err}")
 
         return (True, "")

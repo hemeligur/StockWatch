@@ -3,16 +3,11 @@ import arrow
 from django_q.tasks import schedule
 from django_q.models import Schedule
 
-# from watchers.models import Watcher
-from stocks.stockdata.wrapper import API_VALID_INTERVALS, is_working_hours
+from stocks.stockdata.wrapper import API_VALID_INTERVALS, get_next_working_time
 
 
 def create_schedule(watcher):
-    # if not isinstance(watcher, Watcher):
-    #     raise ValueError(f"Wrong argument type: expected {Watcher}, got {type(watcher)}")
-
     config = _generate_config(watcher.interval)
-    print(f"############-watchers.task_manager.scheduler.create_schedule-############ Config schedule")
     schedule_obj = schedule(
         'watchers.task_manager.updater.update_price',
         watcher.pk,
@@ -22,21 +17,17 @@ def create_schedule(watcher):
         next_run=config["next_run"],
         hook='watchers.task_manager.updater.price_updated'
     )
-    print("############-watchers.task_manager.scheduler.create_schedule-############ Schedule function executed")
 
     return schedule_obj.pk
 
 
 def send_email_async(watcher, result):
-    # if not isinstance(watcher, Watcher):
-    #     raise ValueError(f"Wrong argument type: expected {Watcher}, got {type(watcher)}")
-
     user = watcher.user
     kind_str = "COMPRA" if result["kind"] > 0 else "VENDA"
     price = result["price"]
 
     subject = "Alerta! Monitor de Ativos"
-    msg = (f"Olá {user.username}\n\n,"
+    msg = (f"Olá {user.username},\n\n"
            f"Seu monitor identificou uma oportunidade de {kind_str}"
            f" para o ativo {watcher.stock.code}({watcher.stock.name}),"
            f" com o preço de {price}."
@@ -49,50 +40,32 @@ def _generate_config(interval):
     idx = API_VALID_INTERVALS.index(interval)
 
     config = {
-        'next_run': arrow.now().shift(minutes=1),
+        'next_run': get_next_working_time(),
         'minutes': 1
     }
 
     # Python 3.7 does not have the match/case yet :(
-    if idx <= 5:
+    if idx <= 5:  # ["1m", "2m", "5m", "15m", "30m", "90m"]
         config["schedule_type"] = Schedule.MINUTES
         config["minutes"] = int(interval[:-1])
 
-    elif idx <= 7:
+    elif idx <= 7:  # ["60m", "1h"]
         config["schedule_type"] = Schedule.HOURLY
 
-    elif idx == 8:
+    elif idx == 8:  # ["1d"]
         config["schedule_type"] = Schedule.DAILY
 
-        if not is_working_hours():
-            now = arrow.now()
-            config["next_run"] = now.replace(hour=14, minute=0)
-
-            if (config["next_run"] - now).days < 0:
-                config["next_run"] = config["next_run"].shift(days=1)
-
-    elif idx == 9:
+    elif idx == 9:  # ["5d"]
         config["schedule_type"] = Schedule.MINUTES
         config["minutes"] = 5 * 24 * 60
-        now = arrow.now()
-        config["next_run"] = now.replace(hour=14, minute=0)
 
-        if now.hours > 14 or (now.hours == 14 and now.minutes > 0):
-            config["next_run"] = config["next_run"].shift(days=1)
-
-    elif idx == 10:
+    elif idx == 10:  # ["1wk"]
         config["schedule_type"] = Schedule.WEEKLY
-        now = arrow.now()
 
-        if now.weekday() == 0 or now.weekday() == 6:
-            config["next_run"] = now.shift(weekday=1)
-
-    elif idx == 11:
+    elif idx == 11:  # ["1mo"]
         config["schedule_type"] = Schedule.MONTHLY
 
-    elif idx == 12:
+    elif idx == 12:  # ["3mo"]
         config["schedule_type"] = Schedule.QUARTERLY
-
-    config['next_run'] = config['next_run'].datetime
 
     return config
