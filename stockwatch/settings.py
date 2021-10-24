@@ -171,3 +171,5 @@ EMAIL_BACKEND = 'django_q_email.backends.DjangoQBackend'
 EMAIL_HOST = "localhost"
 EMAIL_PORT = 1025
 DEFAULT_FROM_EMAIL = "watcher@stockwatch.com"
+LOGIN_REDIRECT_URL = '/watchers'
+LOGIN_URL = '/login'
