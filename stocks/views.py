@@ -4,9 +4,10 @@ from django.utils import timezone
 from django.shortcuts import redirect
 
 from datetime import timedelta
+import arrow
 import json
 
-from .models import Stock
+from .models import Stock, Price
 from .stockdata.wrapper import StockData
 
 
@@ -46,9 +47,19 @@ class StockDetailView(DetailView):
             if obj.last_update is None or timezone.now() - obj.last_update > timedelta(hours=12):
                 self.stock_data = StockData(code)
 
-                obj.current_price = self.stock_data.get_last_price()
+                last_date, last_prices = self.stock_data.get_last_price()
+                obj.current_price = last_prices[2]  # Preço de fechamento
                 obj.last_update = timezone.now()
-                obj.save()
+                obj.save(update_fields=["current_price", "last_update"])
+
+                # Salva esse novo preço no DB
+                price = Price(
+                    stock=code,
+                    date=last_date,
+                    granularity_daily=False,
+                    values=last_prices
+                )
+                price.save()
 
         except Http404:
             self.stock_data = StockData(code)
@@ -69,9 +80,18 @@ class StockDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.stock_data is None:
-            self.stock_data = StockData(context['stock'].code)
-        hist = self.stock_data.format_to_chart(self.stock_data.get_history())
+        code = context['stock'].code
+        # Verifica se já possui os dados no DB
+        now = arrow.now()
+        start_date = now.replace(hour=0, minute=0, second=0).shift(months=-6)
+        prices = Price.objects.filter(stock_id=code).filter(date__gte=start_date)
+
+        if len(prices) < (now - start_date).days:
+            if self.stock_data is None:
+                self.stock_data = StockData(code)
+            hist = self.stock_data.format_to_chart(self.stock_data.get_history())
+
+            Price.bulk_create(hist, code)
 
         chart_config = {
             'data': json.dumps(hist),
