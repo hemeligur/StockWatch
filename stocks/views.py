@@ -46,9 +46,10 @@ class StockDetailView(DetailView):
             if obj.last_update is None or timezone.now() - obj.last_update > timedelta(hours=12):
                 self.stock_data = StockData(code)
 
-                obj.current_price = self.stock_data.get_last_price()
+                last_date, last_prices = self.stock_data.get_last_price()
+                obj.current_price = last_prices[2]  # Preço de fechamento
                 obj.last_update = timezone.now()
-                obj.save()
+                obj.save(update_fields=["current_price", "last_update"])
 
         except Http404:
             self.stock_data = StockData(code)

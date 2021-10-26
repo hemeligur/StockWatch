@@ -49,23 +49,24 @@ def get_next_working_time():
         changed = True
 
     if not is_working_hours():
-        # Now can be before opening or after closing
+        # Now pode ser antes da abertura ou depois do fechamento
         next_work_time = next_work_time.replace(hour=DEFAULT_LOOKUP_TIME, minute=0, second=0)
 
-        # If it's already past the default lookup time, we can assume now is after closing, next run is tomorrow
+        # Se já passou do horário padrão de lookup,
+        # nós podemos assumir now é depois do fechamento, próxima execução é amanhã
         if (next_work_time - now).days < 0:
             next_work_time = next_work_time.shift(days=1)
         changed = True
 
     if not changed:
-        # If nothing is changed than set the next time to 1 minute in the future
+        # Se nada mudou então define o próximo horário para 1 minuto no futuro
         next_work_time = next_work_time.shift(minutes=1)
 
     return next_work_time.datetime
 
 
 class StockData():
-    ''' A simple interface for the yahoo finance API to decouple it from the rest of the system '''
+    ''' Simples interface para a yahoo finance API para desacoplar do resto do sistema '''
 
     def __init__(self, code):
         self.code = code.upper()
@@ -77,7 +78,7 @@ class StockData():
     def get_info(self):
         info = self.stock_data.get_info()
 
-        # "if all(key in dict for key in query)" is faster than a try/except
+        # "if all(key in dict for key in query)" é mais rápido que um try/except
         if all(k in info for k in ('symbol', 'longName', 'currentPrice')):
             return {
                 'code': info['symbol'],
@@ -93,7 +94,10 @@ class StockData():
         start_date = end_date.shift(days=-3)
         hist = self.get_history(start_date=start_date.datetime, end_date=end_date.datetime, interval=interval)
 
-        return hist['Close'][-1]
+        return (
+            hist.index[-1].to_pydatetime(),
+            [hist['Low'][-1], hist['Open'][-1], hist['Close'][-1], hist['High'][-1]]
+        )
 
     def get_history(self, period="6mo", start_date=None, end_date=None, interval="1d", actions=False):
 
@@ -104,20 +108,27 @@ class StockData():
 
         if start_date is not None:
             end_date = end_date if end_date is not None else timezone.now()
-            hist = self.stock_data.history(start=start_date, end=end_date, actions=actions)
+            hist = self.stock_data.history(start=start_date, end=end_date, interval=interval, actions=actions)
         else:
-            hist = self.stock_data.history(period=period, actions=actions)
+            hist = self.stock_data.history(period=period, interval=interval, actions=actions)
 
         return hist
 
     def format_to_chart(self, hist):
-        # Formating to return a list of lists in the format: label, low, open, close, high
+        # Retorna uma lista de listas no formato: label, low, open, close, high
         cols = hist.columns.tolist()
         cols = [cols[2]] + [cols[0]] + [cols[3]] + [cols[1]] + cols[4:]
         hist_mod = hist[cols]
         hist_mod = hist_mod[hist_mod.columns.tolist()[:4]]
+
+        # List Comprehension Bonanza!
+        # Transforma o primeiro valor de pandas.Timestamp para string e monta a lista de listas.
+        # Deve haver um jeito mais legível de fazer.
+        # (Um monte de fors e ifs?)
         hist_list = [
-            [i if idx != 0 else i.strftime("%Y-%m-%d") for idx, i in enumerate(row)]
+            [i if idx != 0 else
+             (i.strftime("%Y-%m-%d") if (i.hour == 0 and i.minute == 0) else i.strftime("%Y-%m-%d %H:%M"))
+             for idx, i in enumerate(row)]
             for row in hist_mod.itertuples()
         ]
 
@@ -149,15 +160,15 @@ class StockData():
     def _convert_interval(self, interval):
         idx = API_VALID_INTERVALS.index(interval)
 
-        if idx <= 6:  # minutes
+        if idx <= 6:  # minutos
             minutes = int(interval[:-1])
-        elif idx == 7:  # one hour
+        elif idx == 7:  # uma hora
             minutes = 60
-        elif idx <= 9:  # Days
+        elif idx <= 9:  # Dias
             minutes = int(interval[:-1]) * 24 * 60
-        elif idx == 10:  # week
+        elif idx == 10:  # semana
             minutes = 7 * 24 * 60
-        else:  # months
+        else:  # meses
             minutes = int(interval[:-2]) * 30 * 24 * 60
 
         return minutes
