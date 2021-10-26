@@ -16,7 +16,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', LandingPageView.as_view(), name="landing_page"),
     path('login/', LoginView.as_view(), name="login"),
-    path('logout/', LogoutView.as_view(), name="logout"),
+    path('logout/', LogoutView.as_view(next_page="landing_page"), name="logout"),
     path('signup/', SignUpView.as_view(), name="signup"),
     path('reset-password/', PasswordResetView.as_view(), name="reset_password"),
     path('password-reset-done/', PasswordResetDoneView.as_view(), name="password_reset_done"),

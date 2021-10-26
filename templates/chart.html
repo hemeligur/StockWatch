@@ -14,8 +14,12 @@
                 fallingColor: { fill: '#ffffff', stroke: '#a52714' }, // red
                 risingColor: { stroke: '#0f9d58' }   // green
             },
+            {% if chart_config.height is not None %}
             height: {{chart_config.height}},
+            {% endif %}
+            {% if chart_config.width is not None %}
             width: {{chart_config.width}},
+            {% endif %}
             vAxis: {viewWindowMode: 'maximized'},
             bar: { groupWidth: '90%' },
             title: {{chart_config.title|safe}}

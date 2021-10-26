@@ -12,6 +12,22 @@ from .stockdata.wrapper import StockData
 
 class LandingPageView(TemplateView):
     template_name = "landing_page.html"
+    code_ibov = "^BVSP"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        stock_data = StockData(self.code_ibov, as_is=True)
+        hist = stock_data.format_to_chart(stock_data.get_history())
+
+        chart_config = {
+            'data': json.dumps(hist),
+            'title': json.dumps("Histórico do IBOVESPA dos últimos 6 meses"),
+            # 'height': 700,
+            # 'width': 1300
+        }
+
+        context['chart_config'] = chart_config
+        return context
 
 
 class StockSearchView(TemplateView):
