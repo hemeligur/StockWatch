@@ -68,9 +68,13 @@ def get_next_working_time():
 class StockData():
     ''' Simples interface para a yahoo finance API para desacoplar do resto do sistema '''
 
-    def __init__(self, code):
+    def __init__(self, code, as_is=False):
         self.code = code.upper()
-        self.stock_data = yf.Ticker(self.code + ".SA")
+
+        if not as_is:
+            self.code += ".SA"
+
+        self.stock_data = yf.Ticker(self.code)
 
     def symbol_search(self, query):
         pass
