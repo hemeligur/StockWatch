@@ -1,6 +1,9 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+import json
+
 from .forms import CustomUserCreationForm
 from .models import Watcher
 from stocks.models import Stock
@@ -31,6 +34,19 @@ class WatcherCreateView(LoginRequiredMixin, CreateView):
         "interval"
     ]
     success_url = reverse_lazy('watchers:watcher_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        stock = Stock.objects.get(pk=self.kwargs['pk'])
+        context["stock"] = stock
+
+        context["chart_config"] = {
+            # Temporariamente enviando os dados do gráfico como parâmetros get na url enquanto a cache não esta pronta
+            'data': self.request.GET.get('data'),
+            'title': json.dumps("Histórico dos últimos 6 meses")
+        }
+        return context
 
     def form_valid(self, form):
         self.object = form.save(commit=False)

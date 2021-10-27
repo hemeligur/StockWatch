@@ -1,21 +1,10 @@
-{% extends "base.html" %}
+{% extends "stock_chart.html" %}
 
-{% block chart_script %}
-{% include "chart.html" %}
-{% endblock chart_script %}
-
-{% block content %}
-    <div id="stock_summary">
-        <p>Código: {{stock.code}}</p>
-        <p>Nome: {{stock.name}}</p>
-        <p>Último preço: {{stock.current_price|floatformat:2}}</p>
-        <p>Atualizado em {{stock.last_update}}</p>
-    </div>
-    <div id="ctrls">
-        <a href="#">Alterar período</a>
-        <a href="#">Alterar intervalo</a>
-        <a href="{% url "watchers:watcher_create" stock.pk %}">Criar monitor</a>
-    </div>
-    <div id="chart_div"></div> 
-    {# style="width: 900px; height: 500px;" #}
-{% endblock content %}
+{% block chart_ctrls %}
+<div class="flex-grow pl-4">
+    <h2 class="font-medium title-font text-base text-gray-900 mt-2 tracking-wider">
+        {# Temporariamente enviando os dados do gráfico como parâmetros get na url enquanto a cache não esta pronta #}
+        <a href="{% url "watchers:watcher_create" stock.pk %}?data={{chart_config.data}}">Criar monitor</a>
+    </h2>
+</div>
+{% endblock chart_ctrls %}

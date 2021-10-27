@@ -7,6 +7,9 @@ from statistics import mean
 
 API_VALID_INTERVALS = ["1m", "2m", "5m", "15m", "30m", "90m",
                        "60m", "1h", "1d", "5d", "1wk", "1mo", "3mo"]
+API_INTERVALS_VERBOSE = ["1 minuto", "2 minutos", "5 minutos", "15 minutos",
+                         "30 minutos", "90 minutos", "60 minutos", "1 hora",
+                         "1 dia", "5 dias", "1 semana", "1 mês", "3 meses"]
 API_VALID_PERIODS = ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
 
 # ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]

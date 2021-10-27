@@ -1,9 +1,13 @@
-{% extends "base.html" %}
+{% extends "stock_chart.html" %}
+{% load tailwind_filters %}
 
-{% block content %}
+{% block chart_ctrls %}
+<div class="flex-grow pl-4">
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Salvar">
+        {{ form|crispy }}
+        <input class="font-medium title-font text-base text-gray-900 mt-2 tracking-wider" type="submit" value="Criar monitor">
     </form>
-{% endblock content %}
+    {# <h2 class="font-medium title-font text-base text-gray-900 mt-2 tracking-wider"><a href="{% url "watchers:watcher_create" stock.pk %}">Criar monitor</a></h2> #}
+</div>
+{% endblock chart_ctrls %}

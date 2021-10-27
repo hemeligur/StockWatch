@@ -3,13 +3,13 @@ from django.db import models
 from django_q.models import Schedule
 
 from stocks.models import User, Stock
-from stocks.stockdata.wrapper import API_VALID_INTERVALS
+from stocks.stockdata.wrapper import API_VALID_INTERVALS, API_INTERVALS_VERBOSE
 from watchers.task_manager.scheduler import create_schedule
 
 
 class Watcher(models.Model):
 
-    INTERVALS = {(i, i) for i in API_VALID_INTERVALS}
+    INTERVALS = {i for i in zip(API_VALID_INTERVALS, API_INTERVALS_VERBOSE)}
 
     stock = models.ForeignKey(to=Stock, on_delete=models.CASCADE, verbose_name="Ativo")
     upper_threshold = models.FloatField(verbose_name="Limite superior")

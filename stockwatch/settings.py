@@ -51,6 +51,8 @@ INSTALLED_APPS = [
 
     # Third party apps
     'django_q',
+    "crispy_forms",
+    "crispy_tailwind",
 
     # Project apps
     'stocks',
@@ -173,3 +175,7 @@ EMAIL_PORT = 1025
 DEFAULT_FROM_EMAIL = "watcher@stockwatch.com"
 LOGIN_REDIRECT_URL = '/watchers'
 LOGIN_URL = '/login'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+
+CRISPY_TEMPLATE_PACK = "tailwind"

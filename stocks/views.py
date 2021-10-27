@@ -93,8 +93,8 @@ class StockDetailView(DetailView):
         chart_config = {
             'data': json.dumps(hist),
             'title': json.dumps("Histórico dos últimos 6 meses"),
-            'height': 800,
-            'width': 2000
+            # 'height': 700,
+            # 'width': 1600
         }
 
         context['chart_config'] = chart_config
