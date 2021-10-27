@@ -3,6 +3,7 @@ import arrow
 import yfinance as yf
 from statistics import mean
 
+# TODO Criar um web scrapper usando essa URL como fonte de dados para a pesquisa por nome e código do ativo
 # https://www.guiainvest.com.br/lista-acoes/default.aspx?listaacaopesquisa=petrobras
 
 API_VALID_INTERVALS = ["1m", "2m", "5m", "15m", "30m", "90m",
