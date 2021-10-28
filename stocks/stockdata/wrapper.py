@@ -3,7 +3,7 @@ import arrow
 import yfinance as yf
 from statistics import mean
 
-# TODO Criar um web scrapper usando essa URL como fonte de dados para a pesquisa por nome e código do ativo
+# TODO Criar um web scrapper usando essa URL como fonte de dados para a pesquisa tbm por nome do ativo
 # https://www.guiainvest.com.br/lista-acoes/default.aspx?listaacaopesquisa=petrobras
 
 API_VALID_INTERVALS = ["1m", "2m", "5m", "15m", "30m", "90m",
@@ -12,6 +12,7 @@ API_INTERVALS_VERBOSE = ["1 minuto", "2 minutos", "5 minutos", "15 minutos",
                          "30 minutos", "90 minutos", "60 minutos", "1 hora",
                          "1 dia", "5 dias", "1 semana", "1 mês", "3 meses"]
 API_VALID_PERIODS = ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
+PERIOD_AUTO = "auto"
 
 # ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
 # ["1m", "2m", "5m", "15m", "30m", "90m", "60m", "1h", "1d", "5d", "1wk", "1mo", "3mo"]
@@ -107,7 +108,11 @@ class StockData():
             [hist['Low'][-1], hist['Open'][-1], hist['Close'][-1], hist['High'][-1]]
         )
 
-    def get_history(self, period="6mo", start_date=None, end_date=None, interval="1d", actions=False):
+    def get_history(self, period="6mo", start_date=None, end_date=None, interval="1d",
+                    actions=False, limit_dates=True):
+
+        if period == PERIOD_AUTO:
+            period = self._calc_period(interval)
 
         # Validations
         validation = self._valid_interval(period, interval, start_date)
@@ -120,6 +125,8 @@ class StockData():
         else:
             hist = self.stock_data.history(period=period, interval=interval, actions=actions)
 
+        if limit_dates is True:
+            hist = hist.iloc[-150:]
         return hist
 
     def format_to_chart(self, hist):
@@ -180,3 +187,21 @@ class StockData():
             minutes = int(interval[:-2]) * 30 * 24 * 60
 
         return minutes
+
+    def _calc_period(self, interval):
+        interval_idx = API_VALID_INTERVALS.index(interval)
+
+        if interval_idx == 0:
+            hist_period = API_VALID_PERIODS[1]
+        elif interval_idx <= 8:
+            hist_period = API_VALID_PERIODS[2]
+        elif interval_idx == 9:
+            hist_period = API_VALID_PERIODS[3]
+        elif interval_idx == 10:
+            hist_period = API_VALID_PERIODS[4]
+        elif interval_idx == 11:
+            hist_period = API_VALID_PERIODS[6]
+        elif interval_idx >= 12:
+            hist_period = API_VALID_PERIODS[7]
+
+        return hist_period

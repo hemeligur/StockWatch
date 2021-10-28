@@ -7,7 +7,7 @@ import json
 from .forms import CustomUserCreationForm
 from .models import Watcher
 from stocks.models import Stock
-from stocks.stockdata.wrapper import StockData
+from stocks.stockdata.wrapper import StockData, API_VALID_INTERVALS, API_VALID_PERIODS
 
 
 class SignUpView(CreateView):
@@ -70,7 +70,8 @@ class WatcherDetailView(LoginRequiredMixin, DetailView):
 
         code = self.object.stock_id
         stock_data = StockData(code)
-        hist = stock_data.format_to_chart(stock_data.get_history(period='3mo', interval=self.object.interval))
+
+        hist = stock_data.format_to_chart(stock_data.get_history(period="auto", interval=self.object.interval))
 
         context['stock'] = self.object.stock
         context["chart_config"] = {
