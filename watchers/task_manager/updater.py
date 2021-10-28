@@ -19,7 +19,7 @@ def update_price(watcher_id):
         return result
 
     stock = StockData(watcher.stock_id)
-    result["price"] = stock.get_last_price(watcher.interval)
+    result["price"] = stock.get_last_price(watcher.interval)[1][2]
 
     if result["price"] <= watcher.lower_threshold:
         result["opportunity"] = True
