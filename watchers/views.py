@@ -7,7 +7,7 @@ import json
 from .forms import CustomUserCreationForm
 from .models import Watcher
 from stocks.models import Stock
-from stocks.stockdata.wrapper import StockData, API_VALID_INTERVALS, API_VALID_PERIODS
+from stocks.stockdata.wrapper import StockData
 
 
 class SignUpView(CreateView):
@@ -110,6 +110,12 @@ class WatcherUpdateView(LoginRequiredMixin, UpdateView):
         }
 
         return context
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        if "interval" in form.changed_data:
+            self.object.update_schedule()
+        return super().form_valid(form)
 
 
 class WatcherDeleteView(LoginRequiredMixin, DeleteView):

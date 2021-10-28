@@ -40,9 +40,17 @@ class Watcher(models.Model):
         # Delete the watcher
         super().delete(*args, **kwargs)
 
-    def set_active(self, value):
-        self.active = value
+    def set_active(self, is_active):
+        self.active = is_active
+
+        if is_active:
+            self._add_schedule()
+        else:
+            self._remove_schedule()
+
+    def update_schedule(self):
         self._remove_schedule()
+        self._add_schedule()
 
     def _add_schedule(self):
         if self.active is True and self.schedule_id is None:
