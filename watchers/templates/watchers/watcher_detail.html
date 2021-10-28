@@ -1,7 +1,14 @@
-{% extends "base.html" %}
+{% extends "stock_chart.html" %}
 
-{% block content %}
-    <p>{{watcher}}: {{watcher.stock.current_price|floatformat:2}}</p>
-    <a href="{% url 'watchers:watcher_update' watcher.pk %}">Alterar</a>
-    <a href="{% url 'watchers:watcher_delete' watcher.pk %}">Excluir</a>
-{% endblock content %}
+{% block chart_ctrls %}
+<div class="flex-grow pl-4">
+    <h2 class="font-medium title-font text-sm text-gray-900 mb-1 tracking-wider">Limite superior:</h2>
+    <p class="leading-relaxed">{{watcher.upper_threshold}}</p>
+    <h2 class="font-medium title-font text-sm text-gray-900 mb-1 tracking-wider">Limite inferior:</h2>
+    <p class="leading-relaxed">{{watcher.lower_threshold}}</p>
+    <h2 class="font-medium title-font text-sm text-gray-900 mb-1 tracking-wider">Intervalo:</h2>
+    <p class="leading-relaxed">{{watcher.get_interval_display}}</p>
+    <a href="{% url 'watchers:watcher_update' watcher.pk %}" class="text-purple-500 hover:text-purple-600">Alterar</a>
+    <a href="{% url 'watchers:watcher_delete' watcher.pk %}" class="text-purple-500 hover:text-purple-600">Excluir</a>
+</div>
+{% endblock chart_ctrls %}

@@ -1,12 +1,19 @@
 {% extends "base.html" %}
+{% load tailwind_filters %}
 
 {% block content %}
-    <form method="post">
-        {% csrf_token %}
-        <p>Tem que certeza que quer apagar o monitor?</p>
-        <p>Ativo: {{ watcher.stock }}</p>
-        <p>Limites: {{watcher.upper_threshold}} - {{watcher.lower_threshold}} </p>
-        <p>Intervalo: {{watcher.interval}} </p>
-        <input type="submit" value="Confirmar">
-    </form>
+<section class="text-gray-600 body-font relative">
+    <div class="container px-5 py-24 mx-auto">
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex flex-col text-center w-full mb-12">
+                <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Tem que certeza que quer apagar o monitor?</h1>
+                <p class="sm:text-2xl text-xl font-medium title-font mt-4 mb-2 text-gray-700">Ativo: {{ watcher.stock }}</p>
+                <p class="sm:text-2xl text-xl font-medium title-font mb-2 text-gray-700">Limites: {{watcher.upper_threshold}} - {{watcher.lower_threshold}} </p>
+                <p class="sm:text-2xl text-xl font-medium title-font mb-2 text-gray-700">Intervalo: {{watcher.get_interval_display}}</p>
+                <input type="submit" class="flex mx-auto text-white bg-purple-500 border-0 my-8 py-2 px-8 focus:outline-none hover:bg-purple-600 rounded text-lg" value="Confirmar">
+            </div>
+        </form>
+    </div>
+</section>
 {% endblock content %}

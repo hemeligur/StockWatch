@@ -7,6 +7,7 @@ import json
 from .forms import CustomUserCreationForm
 from .models import Watcher
 from stocks.models import Stock
+from stocks.stockdata.wrapper import StockData
 
 
 class SignUpView(CreateView):
@@ -64,6 +65,21 @@ class WatcherDetailView(LoginRequiredMixin, DetailView):
         user = self.request.user
         return Watcher.objects.filter(user=user)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        code = self.object.stock_id
+        stock_data = StockData(code)
+        hist = stock_data.format_to_chart(stock_data.get_history(period='3mo', interval=self.object.interval))
+
+        context['stock'] = self.object.stock
+        context["chart_config"] = {
+            'data': json.dumps(hist),
+            'title': json.dumps("Histórico dos últimos 3 meses"),
+        }
+
+        return context
+
 
 class WatcherUpdateView(LoginRequiredMixin, UpdateView):
     model = Watcher
@@ -78,6 +94,21 @@ class WatcherUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         user = self.request.user
         return Watcher.objects.filter(user=user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        code = self.object.stock_id
+        stock_data = StockData(code)
+        hist = stock_data.format_to_chart(stock_data.get_history(period='3mo', interval=self.object.interval))
+
+        context['stock'] = self.object.stock
+        context["chart_config"] = {
+            'data': json.dumps(hist),
+            'title': json.dumps("Histórico dos últimos 3 meses"),
+        }
+
+        return context
 
 
 class WatcherDeleteView(LoginRequiredMixin, DeleteView):
