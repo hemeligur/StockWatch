@@ -39,4 +39,4 @@ def price_updated(task):
         # If the email was sent, you don't want to send the email again next interval
         # The watcher did it's job
         if sent == 1:
-            watcher.remove_schedule()
+            watcher.set_active(False)

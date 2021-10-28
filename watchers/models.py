@@ -20,6 +20,7 @@ class Watcher(models.Model):
     )
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
     schedule_id = models.IntegerField(null=True, blank=True)
+    active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Watcher"
@@ -31,16 +32,20 @@ class Watcher(models.Model):
     def save(self, *args, **kwargs):
         # Save the watcher first to generate an ID
         super().save(*args, **kwargs)
-
-        self.add_schedule()
+        # print(kwargs['update_fields'])
+        self._add_schedule()
 
     def delete(self, *args, **kwargs):
-        self.remove_schedule()
+        self._remove_schedule()
         # Delete the watcher
         super().delete(*args, **kwargs)
 
-    def add_schedule(self):
-        if self.schedule_id is None:
+    def set_active(self, value):
+        self.active = value
+        self._remove_schedule()
+
+    def _add_schedule(self):
+        if self.active is True and self.schedule_id is None:
             # Create the schedule
             schedule_id = create_schedule(self)
 
@@ -48,7 +53,7 @@ class Watcher(models.Model):
             self.schedule_id = schedule_id
             super().save(update_fields=['schedule_id'])
 
-    def remove_schedule(self):
+    def _remove_schedule(self):
         if self.schedule_id is not None:
             # Delete the schedule
             Schedule.objects.get(pk=self.schedule_id).delete()
